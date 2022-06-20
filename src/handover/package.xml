@@ -1,0 +1,9 @@
+<package format="2">
+  <name>handover</name>
+  <version>1.0.0</version>
+  <description>
+    Move a Qube
+  </description>
+  <maintainer email="e01630029@student.tuwien.ac.at">Noah Bruns</maintainer>
+  <license>MIT</license>
+</package>
