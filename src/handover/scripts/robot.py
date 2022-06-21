@@ -35,7 +35,9 @@ class ArcMoveIt:
 
         # move group for "Iiwa" group ("LinAxis" not working atm, thus neither "RoboLab")
         move_group = moveit_commander.MoveGroupCommander("RoboLab")
+        move_group.set_planner_id("PRMkConfigDefault")
         self.move_group = move_group
+        
 
         # Demo: some information we can get from the move_group
         # adapted from http://docs.ros.org/en/kinetic/api/moveit_tutorials/html/doc/move_group_python_interface/move_group_python_interface_tutorial.html
@@ -88,21 +90,23 @@ class ArcMoveIt:
         return self.move_group.get_current_pose().pose
 
     def move_taskspace(self, pose_goal, max_timeout=5):
-        if pose_goal is None:
-            pose_goal = copy.deepcopy(self.move_group.get_current_pose().pose)
-            pose_goal.position.x += np.random.uniform(-0.2, 0.2)
-            pose_goal.position.y += np.random.uniform(-0.2, 0.2)
         self.move_group.set_pose_target(pose_goal)
+        self.move_group.set_planner_id("PRMkConfigDefault")
 
         # plan and execute
-        self.move_group.go(wait=True)
-        self.move_group.stop()
-        self.move_group.clear_pose_targets()
+        success, plan, time, errorcode = self.move_group.plan()
 
-        timeout = 0
-        while timeout < max_timeout and not all_close(pose_goal, self.move_group.get_current_pose().pose):
-            rospy.sleep(0.5)
-            timeout += 0.5
+        if success:
+            self.move_group.execute(plan, wait=True)
+            self.move_group.stop()
+            self.move_group.clear_pose_targets()
+
+            timeout = 0
+            while timeout < max_timeout and not all_close(pose_goal, self.move_group.get_current_pose().pose):
+                rospy.sleep(0.5)
+                timeout += 0.5
+        else:
+            rospy.logerr("== Planning failed: %s" % errorcode)
 
 
 if __name__ == '__main__':

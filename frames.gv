@@ -1,0 +1,20 @@
+digraph G {
+"r1/iiwa_link_7" -> "r1/camera"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1204.047 sec old)\nBuffer length: 0.000 sec\n"];
+"r1/iiwa_link_6" -> "r1/iiwa_link_7"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10.227 Hz\nMost recent transform: 1204.000 ( 0.047 sec old)\nBuffer length: 4.400 sec\n"];
+"r1/world" -> "r1/linaxis_link_x1"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1204.047 sec old)\nBuffer length: 0.000 sec\n"];
+"r1/world" -> "r1/linaxis_link_x2"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1204.047 sec old)\nBuffer length: 0.000 sec\n"];
+"r1/linaxis_link_ee" -> "r1/iiwa_link_0"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1204.047 sec old)\nBuffer length: 0.000 sec\n"];
+"r1/linaxis_link_y" -> "r1/linaxis_link_ee"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10.227 Hz\nMost recent transform: 1204.000 ( 0.047 sec old)\nBuffer length: 4.400 sec\n"];
+"r1/world" -> "r1/RoboLab"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1204.047 sec old)\nBuffer length: 0.000 sec\n"];
+"r1/iiwa_link_0" -> "r1/iiwa_link_1"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10.227 Hz\nMost recent transform: 1204.000 ( 0.047 sec old)\nBuffer length: 4.400 sec\n"];
+"r1/iiwa_link_1" -> "r1/iiwa_link_2"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10.227 Hz\nMost recent transform: 1204.000 ( 0.047 sec old)\nBuffer length: 4.400 sec\n"];
+"r1/iiwa_link_2" -> "r1/iiwa_link_3"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10.227 Hz\nMost recent transform: 1204.000 ( 0.047 sec old)\nBuffer length: 4.400 sec\n"];
+"r1/iiwa_link_3" -> "r1/iiwa_link_4"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10.227 Hz\nMost recent transform: 1204.000 ( 0.047 sec old)\nBuffer length: 4.400 sec\n"];
+"r1/iiwa_link_4" -> "r1/iiwa_link_5"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10.227 Hz\nMost recent transform: 1204.000 ( 0.047 sec old)\nBuffer length: 4.400 sec\n"];
+"r1/iiwa_link_5" -> "r1/iiwa_link_6"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10.227 Hz\nMost recent transform: 1204.000 ( 0.047 sec old)\nBuffer length: 4.400 sec\n"];
+"r1/world" -> "r1/linaxis_link_y"[label="Broadcaster: /r1/robot_state_publisher\nAverage rate: 10.227 Hz\nMost recent transform: 1204.000 ( 0.047 sec old)\nBuffer length: 4.400 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1204.047"[ shape=plaintext ] ;
+ }->"r1/world";
+}

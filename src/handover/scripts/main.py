@@ -11,7 +11,7 @@ def move_home(node):
 def main():
     print("Initializing ROS-node")
     rospy.init_node('handover', anonymous=True)
-    rate = rospy.Rate(0.2)
+    rate = rospy.Rate(1)
 
     ic = ArucoDetector()
     node = ArcMoveIt("moveit_py")
@@ -25,26 +25,21 @@ def main():
         if len(markers) > 0:
             markers.sort(key=lambda x: x["size"])
             marker = markers[-1]
-            print("Largest Marker: {}".format(marker))
-
-            print(marker["center"], ic.img_dimensions)
 
             # calculate offset from image center
-            marker_offset = (marker["center"][0] - ic.img_dimensions[0]/2, marker["center"][1] - ic.img_dimensions[1]/2)
+            marker_offset = (marker["center"][0] - ic.img_dimensions[0] / 2, marker["center"][1] - ic.img_dimensions[1] / 2)
             print("Marker offset: {}".format(marker_offset))
 
             pose = node.current_pose()
 
-            print(pose)
-
             # callculate new pose
             pose.position.x += marker_offset[0] / 500.
-            #pose.position.y += marker_offset[1] / 500.
+            #pose.position.z += marker_offset[1] / 500.
 
             print("New pose: {}".format(pose))
 
             # move to new pose
-            node.move_taskspace(pose)
+            # node.move_taskspace(pose)
 
 
         rate.sleep()

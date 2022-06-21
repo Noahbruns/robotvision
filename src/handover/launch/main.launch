@@ -13,12 +13,13 @@
 
   <!-- Start the move group node -->
   <include file="$(find arc_moveit)/launch/move_group.launch">
-  </include>-->
+  </include>
 
   <!-- Span Cube -->
   <node name="spawn_cube" pkg="gazebo_ros" type="spawn_model" args="-file $(find handover)/model/aruco_box/model.sdf -sdf -model cube"/>
   <node name="cube_mover" pkg="handover" type="mover.py" />
 
+  <node name="image_proc" pkg="image_proc" type="image_proc" ns="/r1/camera" />
   <!-- move Robot
   <node name="robot_mover" pkg="handover" type="robot.py" args="joint_states:=/r1/joint_states"/>-->
 

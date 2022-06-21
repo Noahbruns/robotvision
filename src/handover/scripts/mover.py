@@ -3,6 +3,7 @@ import rospy
 import math 
 from gazebo_msgs.msg import ModelState 
 from gazebo_msgs.srv import SetModelState
+from tf.transformations import quaternion_from_euler
 
 def main():
     pub = rospy.Publisher('/gazebo/set_model_state', ModelState, queue_size=1)
@@ -20,26 +21,32 @@ def main():
     state_msg.pose.orientation.x = 0
     state_msg.pose.orientation.y = 0
     state_msg.pose.orientation.z = 0
-    state_msg.pose.orientation.w = 0
+    state_msg.pose.orientation.w = 1
     
     x = .0
-    y = -0.5
+    y = -0.8
     z = 1.2
             
-    step = 0.04
-    radius = 0.1
+    step = 0.02
+    radius = 0
     angle = 0
-        
+
     while not rospy.is_shutdown():
         state_msg.pose.position.x = x + radius * math.sin(angle)
         state_msg.pose.position.y = y + radius * math.cos(angle)
         state_msg.pose.position.z = z
+
+        q = quaternion_from_euler(angle, 0, angle)
+
+        state_msg.pose.orientation.x = q[0]
+        state_msg.pose.orientation.y = q[1]
+        state_msg.pose.orientation.z = q[2]
+        state_msg.pose.orientation.w = q[3]
         
         pub.publish( state_msg )
             
         angle = (angle + step) % (2 * math.pi)
         
-        print(angle)
         rate.sleep()
 
 if __name__ == '__main__':
