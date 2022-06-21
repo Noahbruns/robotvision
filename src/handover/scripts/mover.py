@@ -1,42 +1,49 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+import rospy 
+import math 
+from gazebo_msgs.msg import ModelState 
+from gazebo_msgs.srv import SetModelState
 
-import rospy
-import arc_ros
-import numpy as np
+def main():
+    pub = rospy.Publisher('/gazebo/set_model_state', ModelState, queue_size=1)
+    
+    rospy.init_node('set_pose')
+    rate = rospy.Rate(20) # 20hz
+    
+    rospy.wait_for_service('/gazebo/set_model_state')
 
+    state_msg = ModelState()
+    state_msg.model_name = 'cube'
+    state_msg.pose.position.x = 0
+    state_msg.pose.position.y = 0
+    state_msg.pose.position.z = 0
+    state_msg.pose.orientation.x = 0
+    state_msg.pose.orientation.y = 0
+    state_msg.pose.orientation.z = 0
+    state_msg.pose.orientation.w = 0
+    
+    x = 0.3
+    y = 0.2
+    z = 0.8
+            
+    step = 0.04
+    radius = 0.1
+    angle = 0
+        
+    while not rospy.is_shutdown():
+        state_msg.pose.position.x = x + radius * math.sin(angle)
+        state_msg.pose.position.y = y + radius * math.cos(angle)
+        state_msg.pose.position.z = z
+        
+        pub.publish( state_msg )
+            
+        angle = (angle + step) % (2 * math.pi)
+        
+        print(angle)
+        rate.sleep()
 
-# before you start:
-# $catkin build
-# $roslaunch arc_gazebo robolab.launch
-# $roslaunch arc_ros arc_ros_node.launch
-
-# start example with
-# $cd arc/ros/examples
-# $python move_robolab.py
-
-
-rospy.init_node('mover', anonymous=True) 
-
-linear_axis = arc_ros.LinearAxis.LinearAxis()
-iiwa = arc_ros.Iiwa.Iiwa()
-
-T_traj = 6
-
-while not rospy.is_shutdown():
-
-  t0 = rospy.Time.now().to_sec()
-  q_la = [0.8, 1.2]
-  q_iiwa = 0*np.ones((7,1))
-  
-  linear_axis.move_jointspace(q_la, t0, T_traj,False)
-  iiwa.move_jointspace(q_iiwa, t0, T_traj,False)
-  rospy.sleep(T_traj)
-
-
-  t0 = rospy.Time.now().to_sec()
-  q_la = [0.3, 0.5]
-  q_iiwa = 2*np.ones((7,1))
-      
-  linear_axis.move_jointspace(q_la, t0, T_traj,False)
-  iiwa.move_jointspace(q_iiwa, t0, T_traj,False)
-  rospy.sleep(T_traj)
+if __name__ == '__main__':
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass

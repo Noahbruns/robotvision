@@ -6,4 +6,12 @@
   </description>
   <maintainer email="e01630029@student.tuwien.ac.at">Noah Bruns</maintainer>
   <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>gazebo_ros</depend>
+
+  <export>
+    <gazebo_ros gazebo_model_path="${prefix}/model"/>
+  </export>
 </package>

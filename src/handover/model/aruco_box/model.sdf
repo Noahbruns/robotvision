@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<sdf version="1.5">
+
+  <model name='cube'>
+    <pose>0 0 0 0 -0 0</pose>
+    <static>true</static>
+    <link name='link'>
+      <inertial>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.166667</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.166667</iyy>
+          <iyz>0</iyz>
+          <izz>0.166667</izz>
+        </inertia>
+        <pose>0 0 0 0 -0 0</pose>
+      </inertial>
+      <visual name='aruco_box_mesh'>
+        <geometry>
+          <mesh>
+            <uri>model://aruco_box/model.dae</uri>
+            <scale>0.05 0.05 0.05</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <self_collide>0</self_collide>
+      <enable_wind>0</enable_wind>
+      <kinematic>0</kinematic>
+    </link>
+  </model>
+
+</sdf>

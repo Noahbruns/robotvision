@@ -1,35 +1,24 @@
 <?xml version="1.0"?>
 <launch>
-  <!-- By default, we are not in debug mode -->
-  <arg name="debug" default="false" />
-  <!-- specify the planning pipeline -->
-  <arg name="pipeline" default="ompl" />
-
-
   <!-- Start Gazebo -->
   <include file="$(find arc_gazebo)/launch/RoboLab/robolab.launch">
   </include>
 
+  <!-- Start the arc ros node -->
   <include file="$(find arc_ros)/launch/arc_ros_node.launch">
   </include>
 
-  <!-- Spawn cube -->
-  <!--<node pkg="gazebo_ros" type="spawn_model" name="spawn_cube" args="-file $(find handover)/aruco_box/model.sdf -sdf -model cube" respawn="false"/> -->
+  <!-- Start the moveit integration node -->
+  <node pkg="arc_moveit" type="arc_moveit_controller_node.py" name="arc_moveit_controller"/>
 
-  <remap from="/arc/Iiwa/set_jointspace_trajectory" to="/arm_controller/follow_joint_trajectory"/>
+  <!-- Start the move group node -->
+  <include file="$(find arc_moveit)/launch/move_group.launch">
+  </include>-->
 
-  <!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default) -->
-  <include file="$(find moveit_iiwa)/launch/move_group.launch">
-    <arg name="allow_trajectory_execution" value="true"/>
-    <arg name="moveit_controller_manager" value="simple" />
-    <arg name="info" value="true"/>
-    <arg name="debug" value="$(arg debug)"/>
-    <arg name="pipeline" value="$(arg pipeline)"/>
-    <arg name="load_robot_description" value="true"/>
-  </include>
+  <!-- Span Cube -->
+  <node name="spawn_cube" pkg="gazebo_ros" type="spawn_model" args="-file $(find handover)/model/aruco_box/model.sdf -sdf -model cube"/>
+  <node name="cube_mover" pkg="handover" type="mover.py" />
 
-  <!-- Run Rviz -->
-  <node name="rvizNode" pkg="rviz" type="rviz" respawn="false"
-        args="-d $(find handover)/rviz/setup.rviz" output="screen">
-  </node>
+  <!-- move Robot 
+  <node name="robot_mover" pkg="handover" type="robot.py" args="joint_states:=/r1/joint_states"/>-->
 </launch>

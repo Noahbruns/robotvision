@@ -9,11 +9,13 @@ class MarkerFactory:
 
     @staticmethod
     def create_marker(size, id, margin):
-        aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
+        aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)
 
         # white background
         img = 255 * np.ones((size, size), dtype=np.uint8)
         img_marker = aruco.drawMarker(aruco_dict, id, size - 2 * margin)
+
+        img_marker = cv2.flip(img_marker, 1)
 
         # add marker centered
         img[margin:-margin, margin:-margin] = img_marker
@@ -46,7 +48,7 @@ class TileMap:
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--tile_size", type=int, default=100)
 def main(path, tile_size):
-    margin = int(0.3 * tile_size)
+    margin = int(0.2 * tile_size)
 
     marker_factory = MarkerFactory()
     tile_map = TileMap(tile_size)
@@ -78,7 +80,7 @@ def main(path, tile_size):
     marker_config = dict(zip(order, ids))
 
     config = dict()
-    config["aruco_dict"] = "6X6_250"
+    config["aruco_dict"] = "4X4_50"
     config["markers"] = marker_config
 
     with open(os.path.join(path, "marker_info.yml"), "w") as yml_file:
