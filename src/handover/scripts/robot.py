@@ -32,10 +32,9 @@ class ArcMoveIt:
     def __init__(self, name):
         # MoveIt commander
         moveit_commander.roscpp_initialize(sys.argv)
-        rospy.init_node(name, anonymous=True)
 
         # move group for "Iiwa" group ("LinAxis" not working atm, thus neither "RoboLab")
-        move_group = moveit_commander.MoveGroupCommander("Iiwa")
+        move_group = moveit_commander.MoveGroupCommander("RoboLab")
         self.move_group = move_group
 
         # Demo: some information we can get from the move_group
@@ -71,6 +70,23 @@ class ArcMoveIt:
             rospy.sleep(0.5)
             timeout += 0.5
 
+    def move_taskspace_euler(self, position, orientation, max_timeout=5):
+        pose_goal = geometry_msgs.msg.Pose()
+        pose_goal.position.x = position[0]
+        pose_goal.position.y = position[1]
+        pose_goal.position.z = position[2]
+
+        quaternion = quaternion_from_euler(orientation[0], orientation[1], orientation[2])
+        pose_goal.orientation.x = quaternion[0]
+        pose_goal.orientation.y = quaternion[1]
+        pose_goal.orientation.z = quaternion[2]
+        pose_goal.orientation.w = quaternion[3]
+
+        self.move_taskspace(pose_goal, max_timeout)
+
+    def current_pose(self):
+        return self.move_group.get_current_pose().pose
+
     def move_taskspace(self, pose_goal, max_timeout=5):
         if pose_goal is None:
             pose_goal = copy.deepcopy(self.move_group.get_current_pose().pose)
@@ -90,19 +106,26 @@ class ArcMoveIt:
 
 
 if __name__ == '__main__':
+    rospy.init_node("robot", anonymous=True)
     node = ArcMoveIt("moveit_py")
+
     start_pose = node.move_group.get_current_pose().pose
     print("start_pose: ", start_pose)
 
     pose_goal = geometry_msgs.msg.Pose()
 
+    # Pose Position
     pose_goal.position.x = .0
     pose_goal.position.y = .6
-    pose_goal.position.z = .9
-    pose_goal.orientation.w = 1.0
-    pose_goal.orientation.x = 0.0
-    pose_goal.orientation.y = 0.0
-    pose_goal.orientation.z = 0.0
+    pose_goal.position.z = 1.2
+
+    # Pose Orientation
+    quaternion = quaternion_from_euler(1.5707, 0, 0)
+
+    pose_goal.orientation.x = quaternion[0]
+    pose_goal.orientation.y = quaternion[1]
+    pose_goal.orientation.z = quaternion[2]
+    pose_goal.orientation.w = quaternion[3]
 
     rospy.loginfo("Go into detection Mode")
     node.move_taskspace(pose_goal)

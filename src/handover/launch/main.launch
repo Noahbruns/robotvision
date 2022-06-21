@@ -19,6 +19,9 @@
   <node name="spawn_cube" pkg="gazebo_ros" type="spawn_model" args="-file $(find handover)/model/aruco_box/model.sdf -sdf -model cube"/>
   <node name="cube_mover" pkg="handover" type="mover.py" />
 
-  <!-- move Robot 
+  <!-- move Robot
   <node name="robot_mover" pkg="handover" type="robot.py" args="joint_states:=/r1/joint_states"/>-->
+
+  <!-- Detect Markers
+  <node name="marker_detector" pkg="handover" type="detect.py"/>-->
 </launch>

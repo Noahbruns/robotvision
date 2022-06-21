@@ -22,9 +22,9 @@ def main():
     state_msg.pose.orientation.z = 0
     state_msg.pose.orientation.w = 0
     
-    x = 0.3
-    y = 0.2
-    z = 0.8
+    x = .0
+    y = -0.5
+    z = 1.2
             
     step = 0.04
     radius = 0.1
