@@ -13,6 +13,7 @@ from tf.transformations import quaternion_from_euler
 
 class Mode(Enum):
     Home = 0
+    Lookout = 2
     Approach = 1
     Grab = 2
 
@@ -29,15 +30,18 @@ def main():
     ic = ArucoDetector()
     node = ArcMoveIt("moveit_py")
 
-    move_home(node)
     mode = Mode.Home
-    print("Mode set to Home")
 
     while not rospy.is_shutdown():
         markers = ic.markers
 
+        if mode == Mode.Home:
+            move_home(node)
+            print("Arrived Home")
+            mode = Mode.Lookout
+
         # Home Mode
-        if len(markers) > 0 and mode == Mode.Home:
+        if len(markers) > 0 and mode == Mode.Lookout:
             marker = ic.best_marker
             
             if marker is not None:
@@ -61,6 +65,7 @@ def main():
                     # move to new pose
                     node.move_taskspace(target)
 
+                    rospy.sleep(0.5)
                     mode = Mode.Approach
                     print("Mode set to Target")
 
@@ -95,8 +100,10 @@ def main():
                     # move to new pose
                     node.move_taskspace_cartesian(target)
 
-                    mode = Mode.Grab
+                    mode = Mode.Home
                     print("Mode set to Grab")
+
+                    rospy.sleep(3)
 
         rate.sleep()
 

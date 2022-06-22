@@ -126,7 +126,7 @@ class ArcMoveIt:
         # create a trajectory to follow
         (plan, fraction) = self.move_group.compute_cartesian_path(
             [self.current_pose(), pose_goal.pose],
-            0.01, # epsilon
+            0.001, # epsilon
             0 # jump
         )
 
