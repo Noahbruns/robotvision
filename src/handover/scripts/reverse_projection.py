@@ -9,8 +9,6 @@ def solve(pa,pb,pd):
     pd = pd - pa
     pa = pa - pa
 
-    print(pa,pb,pd)
-
     xb = pb[0]
     yb = pb[1]
     xd = pd[0]
@@ -18,8 +16,6 @@ def solve(pa,pb,pd):
 
     v = -(xb * xd + yb * yd)
     u = (xd**2 + yd**2) - (xb**2 + yb**2)
-
-    print(v,u)
 
     a = 1
     b = -u
@@ -44,8 +40,6 @@ def solve(pa,pb,pd):
     else:
         b = math.sqrt(sol)
         d = v / b
-
-    print(b,d)
 
     ab = (xb, yb, b)
     ad = (xd, yd, d)

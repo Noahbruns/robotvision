@@ -14,7 +14,7 @@ from geometry_msgs.msg import Pose, PoseArray, PoseStamped
 import math
 from tf.transformations import quaternion_about_axis
 
-real_aruco_diameter = 0.05 * 0.7 * 2
+real_aruco_diameter = 0.05 * 0.7 * 1.8
 
 def corner_to_center(corners):
   M = cv2.moments(corners)
@@ -43,8 +43,6 @@ def estimate_pose(corners, camera_info):
   angle = np.arccos(np.dot(realtive, n) / (np.linalg.norm(realtive) * np.linalg.norm(n)))
   q = quaternion_about_axis(angle, S)
 
-  print(q)
-
   pose = Pose()
   pose.orientation.x = q[0]
   pose.orientation.y = q[1]
@@ -55,13 +53,9 @@ def estimate_pose(corners, camera_info):
 
   if camera_info is not None:
     distance = (camera_info.K[0] * real_aruco_diameter) / length
-    print(distance)
     pose.position.x = distance * (center[0] - camera_info.K[2]) / camera_info.K[0]
     pose.position.y = distance * (center[1] - camera_info.K[5]) / camera_info.K[4]
     pose.position.z = distance
-
-  
-  print(pose)
 
   return pose
 
@@ -75,8 +69,8 @@ class ArucoDetector:
     self.image_sub = rospy.Subscriber("/r1/camera/image_rect", Image, self.callback, queue_size=1)
     self.image_camera_info_sub = rospy.Subscriber("/r1/camera/camera_info", CameraInfo, self.callback_info, queue_size=1)
 
-    self.markers = []
-    self.img_dimensions = (0, 0)
+    self.markers = [None, None, None, None, None, None, None]
+    self.best_marker = None
     self.camera_info = None
 
   def callback_info(self,data):
@@ -88,37 +82,44 @@ class ArucoDetector:
     except CvBridgeError as e:
       print(e)
 
-    # get the image dimensions
-    self.img_dimensions = cv_image.shape[:2][::-1]
-
     corners_list, ids_list = self.detect_aruco(cv_image)
 
     pose_arr = PoseArray()
     pose_arr.header.frame_id = "r1/iiwa_link_7"
 
-    if len(corners_list) > 0:
-      self.markers = [{
-        "id": ids_list[i], 
+    markers = list([None, None, None, None, None, None])
+    best_marker = None
+
+    # build map of markers
+    for i in range(len(corners_list)):
+      markers[ids_list[i][0]] = {
+        "id": ids_list[i][0], 
         "center": corner_to_center(corners_list[i]),
         "size": corner_to_area(corners_list[i]),
         "pose": estimate_pose(corners_list[i], self.camera_info),
-      } for i in range(len(ids_list))]
+      }
 
-      #sort markers by size
-      main = list(filter(lambda x: x["id"] == 0, self.markers))
-      #estimate pose of biggest marker
-      if len(main) > 0:
-        self.cube_pub.publish(PoseStamped(header=rospy.Header(frame_id="r1/iiwa_link_7"), pose=main[0]["pose"]))
-      
-      # publish pose hard
-      pose_arr.poses = [marker["pose"] for marker in self.markers]
-      self.pose_pub.publish(pose_arr)
-    else:
-      self.markers = []
+    # find best marker
+    best_marker = None
+    for marker in markers:
+      if marker is not None and (best_marker is None or marker["size"] > best_marker["size"]):
+        best_marker = marker
+    
+    self.best_marker = best_marker
+    self.markers = markers
+
+    #estimate pose of biggest marker
+    if self.best_marker is not None:
+      self.cube_pub.publish(PoseStamped(header=rospy.Header(frame_id="r1/iiwa_link_7"), pose=self.best_marker["pose"]))
+    
+    # publish pose hard
+    pose_arr.poses = [marker["pose"] for marker in self.markers if marker is not None]
+    self.pose_pub.publish(pose_arr)
 
     markers_img = cv_image
     for i in self.markers:
-      markers_img = cv2.circle(markers_img, i["center"], 5, (0, 0, 255), -1)
+      if i is not None:
+        markers_img = cv2.circle(markers_img, i["center"], 5, (0, 0, 255), -1)
 
     try:
       self.image_pub.publish(self.bridge.cv2_to_imgmsg(markers_img, "bgr8"))

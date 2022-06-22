@@ -27,7 +27,7 @@ def main():
     y = -0.8
     z = 1.2
             
-    step = 0.02
+    step = 0
     radius = 0
     angle = 0
 
@@ -36,7 +36,7 @@ def main():
         state_msg.pose.position.y = y + radius * math.cos(angle)
         state_msg.pose.position.z = z
 
-        q = quaternion_from_euler(angle, 0, angle)
+        q = quaternion_from_euler(angle, 0, angle + math.pi)
 
         state_msg.pose.orientation.x = q[0]
         state_msg.pose.orientation.y = q[1]

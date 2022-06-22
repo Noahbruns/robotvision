@@ -17,7 +17,7 @@ def all_close(goal, actual, tolerance_d=0.01, tolerance_phi_rad=np.deg2rad(5)):
             if np.abs(actual[index] - goal[index]) > tolerance_d:
                 return False
     elif type(goal) is geometry_msgs.msg.PoseStamped:
-        return all_close(goal.pose, actual.pose, tolerance_d, tolerance_phi_rad)
+        return all_close(goal.pose, actual, tolerance_d, tolerance_phi_rad)
     elif type(goal) is geometry_msgs.msg.Pose:
         x0, y0, z0, qx0, qy0, qz0, qw0 = pose_to_list(actual)
         x1, y1, z1, qx1, qy1, qz1, qw1 = pose_to_list(goal)
@@ -84,14 +84,25 @@ class ArcMoveIt:
         pose_goal.orientation.z = quaternion[2]
         pose_goal.orientation.w = quaternion[3]
 
+        
         self.move_taskspace(pose_goal, max_timeout)
 
     def current_pose(self):
         return self.move_group.get_current_pose().pose
 
+    def orientation_from_euler(self, euler):
+        quaternion = quaternion_from_euler(euler[0], euler[1], euler[2])
+        orientation = geometry_msgs.msg.Quaternion()
+
+        orientation.x = quaternion[0]
+        orientation.y = quaternion[1]
+        orientation.z = quaternion[2]
+        orientation.w = quaternion[3]
+
+        return orientation
+
     def move_taskspace(self, pose_goal, max_timeout=5):
         self.move_group.set_pose_target(pose_goal)
-        self.move_group.set_planner_id("PRMkConfigDefault")
 
         # plan and execute
         success, plan, time, errorcode = self.move_group.plan()
@@ -107,6 +118,27 @@ class ArcMoveIt:
                 timeout += 0.5
         else:
             rospy.logerr("== Planning failed: %s" % errorcode)
+
+
+
+    def move_taskspace_cartesian(self, pose_goal, max_timeout=5):
+        # adapted from http://docs.ros.org/en/kinetic/api/moveit_tutorials/html/doc/move_group_python_interface/move_group_python_interface_tutorial.html
+        # create a trajectory to follow
+        (plan, fraction) = self.move_group.compute_cartesian_path(
+            [self.current_pose(), pose_goal.pose],
+            0.01, # epsilon
+            0 # jump
+        )
+
+        # execute the trajectory
+        self.move_group.execute(plan, wait=True)
+        self.move_group.stop()
+        self.move_group.clear_pose_targets()
+
+        timeout = 0
+        while timeout < max_timeout and not all_close(pose_goal, self.move_group.get_current_pose().pose):
+            rospy.sleep(0.5)
+            timeout += 0.5
 
 
 if __name__ == '__main__':

@@ -8,6 +8,9 @@
   <include file="$(find arc_ros)/launch/arc_ros_node.launch">
   </include>
 
+  <!-- tf between world and r1/world -->
+  <node pkg="tf" type="static_transform_publisher" name="world_lock" args="0 0 0 0 0 0 world r1/world 100" />
+
   <!-- Start the moveit integration node -->
   <node pkg="arc_moveit" type="arc_moveit_controller_node.py" name="arc_moveit_controller"/>
 
