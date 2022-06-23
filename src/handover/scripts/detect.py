@@ -2,62 +2,16 @@
 
 from os import SEEK_DATA
 from re import M
-from reverse_projection import solve
 import rospy
 import cv2
 from std_msgs.msg import String
 from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 import cv2.aruco as aruco 
-import numpy as np
 from geometry_msgs.msg import Pose, PoseArray, PoseStamped
-import math
-from tf.transformations import quaternion_about_axis
+from reverse_projection import corner_to_area, corner_to_center, estimate_pose
 
-real_aruco_diameter = 0.05 * 0.7 * 1.8
-
-def corner_to_center(corners):
-  M = cv2.moments(corners)
-  cx = int(M['m10']/M['m00'])
-  cy = int(M['m01']/M['m00'])
-  return (cx, cy)
-
-def corner_to_area(corners):
-  area = cv2.contourArea(corners)
-  return area
-
-# estimate 3d normal vector from 3 points of a 2d triangle
-def estimate_pose(corners, camera_info):
-  # calculate 2 vectors from corners
-  v1, v2 = solve(corners[0][0], corners[0][1], corners[0][3])
-  center = corner_to_center(corners)
-
-  # calculate normal vector
-  n = np.cross(v1, v2)
-  n = n / np.linalg.norm(n)
-  n[2] = -n[2]
-
-  # Reference = https://itecnote.com/tecnote/converting-a-direction-vector-to-a-quaternion-rotation/
-  realtive = [1, 0, 0]
-  S = np.cross(realtive, n)
-  angle = np.arccos(np.dot(realtive, n) / (np.linalg.norm(realtive) * np.linalg.norm(n)))
-  q = quaternion_about_axis(angle, S)
-
-  pose = Pose()
-  pose.orientation.x = q[0]
-  pose.orientation.y = q[1]
-  pose.orientation.z = q[2]
-  pose.orientation.w = q[3]
-
-  length = np.linalg.norm(v1)
-
-  if camera_info is not None:
-    distance = (camera_info.K[0] * real_aruco_diameter) / length
-    pose.position.x = distance * (center[0] - camera_info.K[2]) / camera_info.K[0]
-    pose.position.y = distance * (center[1] - camera_info.K[5]) / camera_info.K[4]
-    pose.position.z = distance
-
-  return pose
+real_aruco_diameter = 0.05 * 0.7 * 1.7
 
 class ArucoDetector:
 
@@ -82,6 +36,9 @@ class ArucoDetector:
     except CvBridgeError as e:
       print(e)
 
+    if self.camera_info is None:
+      return
+
     corners_list, ids_list = self.detect_aruco(cv_image)
 
     pose_arr = PoseArray()
@@ -96,7 +53,7 @@ class ArucoDetector:
         "id": ids_list[i][0], 
         "center": corner_to_center(corners_list[i]),
         "size": corner_to_area(corners_list[i]),
-        "pose": estimate_pose(corners_list[i], self.camera_info),
+        "pose": estimate_pose(ids_list[i][0], corners_list[i][0], self.camera_info, real_aruco_diameter),
       }
 
     # find best marker
@@ -112,7 +69,7 @@ class ArucoDetector:
     if self.best_marker is not None:
       self.cube_pub.publish(PoseStamped(header=rospy.Header(frame_id="r1/iiwa_link_7"), pose=self.best_marker["pose"]))
     
-    # publish pose hard
+    # publish pose array
     pose_arr.poses = [marker["pose"] for marker in self.markers if marker is not None]
     self.pose_pub.publish(pose_arr)
 
@@ -120,6 +77,8 @@ class ArucoDetector:
     for i in self.markers:
       if i is not None:
         markers_img = cv2.circle(markers_img, i["center"], 5, (0, 0, 255), -1)
+
+    markers_img = aruco.drawDetectedMarkers(markers_img, corners_list, ids_list)  # detect the sruco markers and display its aruco id.
 
     try:
       self.image_pub.publish(self.bridge.cv2_to_imgmsg(markers_img, "bgr8"))

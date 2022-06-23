@@ -13,9 +13,10 @@ from tf.transformations import quaternion_from_euler
 
 class Mode(Enum):
     Home = 0
-    Lookout = 2
-    Approach = 1
-    Grab = 2
+    Lookout = 1
+    Approach = 2
+    Grab = 3
+    Done = 4
 
 def move_home(node):
     node.move_taskspace_euler([0, 0.6, 1.2], [1.5707, 0, 0])
@@ -67,7 +68,7 @@ def main():
 
                     rospy.sleep(0.5)
                     mode = Mode.Approach
-                    print("Mode set to Target")
+                    print("Mode set to Approach")
 
         # Home Mode
         if len(markers) > 0 and mode == Mode.Approach:
@@ -100,7 +101,7 @@ def main():
                     # move to new pose
                     node.move_taskspace_cartesian(target)
 
-                    mode = Mode.Home
+                    mode = Mode.Done
                     print("Mode set to Grab")
 
                     rospy.sleep(3)
