@@ -22,6 +22,8 @@ class MarkerFactory:
         if id == 5:
             img[:] = (75, 75, 255)
 
+        img[7:-7, 7:-7] = (255, 255, 255)
+
         # white background
         img_marker = cv2.cvtColor(aruco.drawMarker(aruco_dict, id, size - 2 * margin),cv2.COLOR_GRAY2RGB)
 
