@@ -80,6 +80,7 @@ def estimate_pose(id, corners, camera_info, diameter):
     ad_length = np.linalg.norm(ad)
     bc_length = np.linalg.norm(bc)
 
+
     # check sizes of rectangles and adapt angle if necessary
     # if one side of the rectangle is smaller than the other this side is further away from the camera
     if ad_length > bc_length:
@@ -106,8 +107,8 @@ def estimate_pose(id, corners, camera_info, diameter):
     #print("Normal: ", n)
 
     # calculate yaw angle
-    pitch_angle = math.atan2(n[2], n[0])
-    roll_angle = math.atan2(n[2], n[1])
+    pitch_angle = math.atan(n[1] / n[2])
+    roll_angle = math.atan(n[0] / n[2])
 
     #print("Angels: ", roll_angle, pitch_angle, yaw_angle)
     q = quaternion_from_euler(roll_angle, pitch_angle, yaw_angle)

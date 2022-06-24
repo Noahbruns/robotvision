@@ -2,14 +2,16 @@
 
 from os import SEEK_DATA
 from re import M
+from reverse_projection_aruco import estimate_pose_aruco
 import rospy
 import cv2
 from std_msgs.msg import String
 from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 import cv2.aruco as aruco 
-from geometry_msgs.msg import Pose, PoseArray, PoseStamped
+from geometry_msgs.msg import Pose, PoseArray, PoseStamped, TransformStamped
 from reverse_projection import corner_to_area, corner_to_center, estimate_pose
+import tf
 
 real_aruco_diameter = 0.05 * 0.7 * 1.7
 
@@ -42,7 +44,7 @@ class ArucoDetector:
     corners_list, ids_list = self.detect_aruco(cv_image)
 
     pose_arr = PoseArray()
-    pose_arr.header.frame_id = "r1/iiwa_link_7"
+    pose_arr.header.frame_id = "r1/camera"
 
     markers = list([None, None, None, None, None, None])
     best_marker = None
@@ -53,7 +55,7 @@ class ArucoDetector:
         "id": ids_list[i][0], 
         "center": corner_to_center(corners_list[i]),
         "size": corner_to_area(corners_list[i]),
-        "pose": estimate_pose(ids_list[i][0], corners_list[i][0], self.camera_info, real_aruco_diameter),
+        "pose": estimate_pose_aruco(ids_list[i][0], corners_list[i][0], self.camera_info, real_aruco_diameter),
       }
 
     # find best marker
@@ -66,8 +68,8 @@ class ArucoDetector:
     self.markers = markers
 
     #estimate pose of biggest marker
-    if self.best_marker is not None:
-      self.cube_pub.publish(PoseStamped(header=rospy.Header(frame_id="r1/iiwa_link_7"), pose=self.best_marker["pose"]))
+    if self.markers[0] is not None:
+      self.cube_pub.publish(PoseStamped(header=rospy.Header(frame_id="r1/camera"), pose=self.markers[0]["pose"]))
     
     # publish pose array
     pose_arr.poses = [marker["pose"] for marker in self.markers if marker is not None]

@@ -3,11 +3,11 @@ import rospy
 import moveit_commander
 import moveit_msgs.msg
 from moveit_commander.conversions import pose_to_list
-import geometry_msgs.msg
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 import numpy as np
 import copy
 import sys
-from tf.transformations import quaternion_from_euler
+from tf.transformations import quaternion_from_euler, quaternion_multiply, quaternion_about_axis
 
 def all_close(goal, actual, tolerance_d=0.01, tolerance_phi_rad=np.deg2rad(5)):
     # check if goal and actual are within [tolerance_d] meters and [tolerance_phi_rad] radians from each other
@@ -16,9 +16,9 @@ def all_close(goal, actual, tolerance_d=0.01, tolerance_phi_rad=np.deg2rad(5)):
         for index in range(len(goal)):
             if np.abs(actual[index] - goal[index]) > tolerance_d:
                 return False
-    elif type(goal) is geometry_msgs.msg.PoseStamped:
+    elif type(goal) is PoseStamped:
         return all_close(goal.pose, actual, tolerance_d, tolerance_phi_rad)
-    elif type(goal) is geometry_msgs.msg.Pose:
+    elif type(goal) is Pose:
         x0, y0, z0, qx0, qy0, qz0, qw0 = pose_to_list(actual)
         x1, y1, z1, qx1, qy1, qz1, qw1 = pose_to_list(goal)
         d = np.linalg.norm([x1-x0, y1-y0, z1-z0])
@@ -41,8 +41,8 @@ class ArcMoveIt:
 
         # Demo: some information we can get from the move_group
         # adapted from http://docs.ros.org/en/kinetic/api/moveit_tutorials/html/doc/move_group_python_interface/move_group_python_interface_tutorial.html
-        planning_frame = move_group.get_planning_frame()
-        rospy.loginfo("== Planning frame: %s" % planning_frame)
+        self.planning_frame = move_group.get_planning_frame()
+        rospy.loginfo("== Planning frame: %s" % self.planning_frame)
 
         eef_link = move_group.get_end_effector_link()
         rospy.loginfo("== End effector link: %s" % eef_link)
@@ -52,17 +52,6 @@ class ArcMoveIt:
         rospy.loginfo("== Available Planning Groups: %s" % ", ".join(group_names))
 
     def move_jointspace(self, joint_goal, max_timeout=5):
-        if joint_goal is None:
-            tau = 2.0 * np.pi
-            joint_goal = copy.deepcopy(self.move_group.get_current_joint_values())
-            joint_goal[0] = 0
-            joint_goal[1] = -tau / 8
-            joint_goal[2] = 0
-            joint_goal[3] = -tau / 4
-            joint_goal[4] = 0
-            joint_goal[5] = tau / 6  # 1/6 of a turn
-            joint_goal[6] = 0
-
         # plan and execute
         self.move_group.go(joint_goal, wait=True)
         self.move_group.stop()
@@ -73,7 +62,7 @@ class ArcMoveIt:
             timeout += 0.5
 
     def move_taskspace_euler(self, position, orientation, max_timeout=5):
-        pose_goal = geometry_msgs.msg.Pose()
+        pose_goal = Pose()
         pose_goal.position.x = position[0]
         pose_goal.position.y = position[1]
         pose_goal.position.z = position[2]
@@ -90,9 +79,12 @@ class ArcMoveIt:
     def current_pose(self):
         return self.move_group.get_current_pose().pose
 
+    def current_joints(self):
+        return self.move_group.get_current_joint_values()
+
     def orientation_from_euler(self, euler):
         quaternion = quaternion_from_euler(euler[0], euler[1], euler[2])
-        orientation = geometry_msgs.msg.Quaternion()
+        orientation = Quaternion()
 
         orientation.x = quaternion[0]
         orientation.y = quaternion[1]
@@ -148,7 +140,7 @@ if __name__ == '__main__':
     start_pose = node.move_group.get_current_pose().pose
     print("start_pose: ", start_pose)
 
-    pose_goal = geometry_msgs.msg.Pose()
+    pose_goal = Pose()
 
     # Pose Position
     pose_goal.position.x = .0
