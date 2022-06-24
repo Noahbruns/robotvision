@@ -11,9 +11,19 @@ class MarkerFactory:
     def create_marker(size, id, margin):
         aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)
 
+        img = 255 * np.ones((size, size, 3), dtype=np.uint8)
+
+        if id == 0:
+            img[:] = (1, 200, 255)
+        if id == 4:
+            img[:] = (119, 80, 64)
+        if id == 2:
+            img[:] = (105, 186, 127)
+        if id == 5:
+            img[:] = (75, 75, 255)
+
         # white background
-        img = 255 * np.ones((size, size), dtype=np.uint8)
-        img_marker = aruco.drawMarker(aruco_dict, id, size - 2 * margin)
+        img_marker = cv2.cvtColor(aruco.drawMarker(aruco_dict, id, size - 2 * margin),cv2.COLOR_GRAY2RGB)
 
         img_marker = cv2.flip(img_marker, 1)
 
@@ -27,7 +37,7 @@ class TileMap:
     _map: np.ndarray
 
     def __init__(self, tile_size):
-        self._map = 255 * np.ones((4, 3, tile_size, tile_size), dtype=np.uint8)
+        self._map = 255 * np.ones((4, 3, tile_size, tile_size, 3), dtype=np.uint8)
 
     def set_tile(self, pos: tuple, img: np.ndarray):
         assert np.all(self._map[pos[0], pos[1]].shape == img.shape)
@@ -36,10 +46,10 @@ class TileMap:
     def get_map_image(self):
         """ Merges the tile map into a single image """
 
-        img = np.concatenate(self._map, axis=-1)
-        img = np.concatenate(img, axis=-2)
+        img = np.concatenate(self._map, axis=-2)
+        img = np.concatenate(img, axis=-3)
 
-        img = img.T
+        img = np.transpose(img, (1, 0, 2))
 
         return img
 
@@ -71,7 +81,7 @@ def main(path, tile_size):
 
     tile_img = tile_map.get_map_image()
 
-    tile_img_square = np.zeros((tile_size * 4, tile_size*4))
+    tile_img_square = np.zeros((tile_size * 4, tile_size*4, 3))
     tile_img_square[:, (tile_size//2):(-tile_size//2)] = tile_img
 
     cv2.imwrite(os.path.join(path, "marker_tile.png"), tile_img)

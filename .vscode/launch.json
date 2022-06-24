@@ -1,19 +1,26 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "src/handover/scripts/main.py",
-            "args": [
-                "joint_states:=/r1/joint_states"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Generate Tiles",
+      "type": "python",
+      "request": "launch",
+      "program": "src/handover/model/aruco_box/src/create_marker_tile_image.py",
+      "args": ["src/handover/model/aruco_box/materials/textures"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "src/handover/scripts/main.py",
+      "args": ["joint_states:=/r1/joint_states"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
 }
