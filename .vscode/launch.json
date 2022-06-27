@@ -5,16 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Generate Tiles",
-      "type": "python",
-      "request": "launch",
-      "program": "src/handover/model/aruco_box/src/create_marker_tile_image.py",
-      "args": ["src/handover/model/aruco_box/materials/textures"],
-      "console": "integratedTerminal",
-      "justMyCode": true
-    },
-    {
-      "name": "Python: Current File",
+      "name": "Python: Run Main",
       "type": "python",
       "request": "launch",
       "program": "src/handover/scripts/main.py",

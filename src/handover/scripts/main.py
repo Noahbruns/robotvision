@@ -16,9 +16,9 @@ import numpy as np
 
 # Funktion:
 # 0: Greifen
-# 4: go to home
-# 2: rotate head
-# 5: tracking
+# 5: go to home
+# 4: rotate head
+# 1: tracking
 
 class Mode(Enum):
     Home = auto()
@@ -67,11 +67,11 @@ def main():
                 print("Found marker 0 -> Grab Object")
                 mode = Mode.Approach
 
-            if marker["id"] == 2:
+            if marker["id"] == 4:
                 print("Found marker 2 -> Rotate Head")
                 mode = Mode.RotateHead
 
-            if marker["id"] == 5:
+            if marker["id"] == 1:
                 print("Found marker 5 -> Tracking")
                 mode = Mode.Tracking
 
@@ -137,13 +137,13 @@ def main():
                 continue
 
         if marker is not None and mode == Mode.Done:
-            if marker["id"] == 4:
+            if marker["id"] == 5:
                 print("Going Home Now")
                 mode = Mode.Home
                 continue
 
         if marker is not None and mode == Mode.RotateHead:
-            if marker["id"] == 4:
+            if marker["id"] == 5:
                 print("Going Home Now")
                 mode = Mode.Home
                 continue
@@ -156,7 +156,7 @@ def main():
             node.move_jointspace(joints)
 
         if marker is not None and mode == Mode.Tracking:
-            if marker["id"] == 4:
+            if marker["id"] == 5:
                 print("Going Home Now")
                 mode = Mode.Home
                 continue

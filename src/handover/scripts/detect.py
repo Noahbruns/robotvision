@@ -13,7 +13,7 @@ from geometry_msgs.msg import Pose, PoseArray, PoseStamped, TransformStamped
 from reverse_projection import corner_to_area, corner_to_center, estimate_pose
 import tf
 
-real_aruco_diameter = 0.05 * 0.7 * 1.7
+real_aruco_diameter = 0.1 * 0.6
 
 class ArucoDetector:
 
