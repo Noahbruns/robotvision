@@ -2,6 +2,8 @@
 
 This repository provides a cube for Gazebo. An ArUco marker is attached to each side of the cube.
 
+Copy from Fabian Reister
+
 ![gazebo](doc/gazebo.png)
 
 The current parameters are:

@@ -1,8 +1,8 @@
 aruco_dict: 4X4_50
 markers:
-  back: 4
-  botton: 1
-  front: 2
-  left: 0
-  right: 5
-  top: 3
+  back: 5
+  botton: 3
+  front: 0
+  left: 1
+  right:  4
+  top: 2
