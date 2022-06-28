@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Servo Server -->
+  <node name="camera" pkg="usb_cam" type="usb_cam_node">
+    <param name="camera_name" value="top_front_camera"/>
+    <param name="camera_frame_id" value="top_front_camera_optical_frame"/>
+    <param name="image_width" value="1920"/>
+    <param name="image_height" value="1080"/>
+    <param name="pixel_format" value="yuyv"/>
+  </node>
+</launch>

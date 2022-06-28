@@ -12,6 +12,14 @@
       "args": ["joint_states:=/r1/joint_states"],
       "console": "integratedTerminal",
       "justMyCode": true
+    },
+    {
+      "name": "Python: AcrMoveit Controller",
+      "type": "python",
+      "request": "launch",
+      "program": "src/arc-master/moveit/nodes/arc_moveit_controller_node.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
     }
   ]
 }

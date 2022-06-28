@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Servo Server -->
+  <node name="servo_server" pkg="moveit_servo" type="servo_server">
+    <param name="parameter_ns" type="string" value="optional_parameter_namespace" />
+    <rosparam ns="optional_parameter_namespace" command="load" file="$(find handover)/servoing/simulation_config.yaml" />
+  </node>
+</launch>

@@ -33,7 +33,7 @@ class Mode(Enum):
     Tracking = auto()
 
 def move_home(node):
-    node.move_taskspace_euler([0, 0.6, 1.2], [1.5707, 0, 0])
+    node.move_taskspace_euler([0, 0.6, 1.2], [1.5707, 1.5707, 0])
 
 def main():
     print("Initializing ROS-node")
