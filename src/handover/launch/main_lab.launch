@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Start the arc ros node -->
+  <include file="$(find arc_ros)/launch/arc_ros_node.launch">
+  </include>
+
+  <!-- tf between world and r1/world 
+  <node pkg="tf" type="static_transform_publisher" name="world_lock" args="0 0 0 0 0 0 world r1/world 100" />-->
+
+  <!-- Start the moveit integration node -->
+  <node pkg="arc_moveit" type="arc_moveit_controller_node.py" name="arc_moveit_controller"/>
+
+  <!-- Start the move group node -->
+  <include file="$(find arc_moveit)/launch/move_group.launch">
+  </include>
+
+  <node name="image_proc" pkg="image_proc" type="image_proc" ns="/r1/camera" />
+  <!-- move Robot
+  <node name="robot_mover" pkg="handover" type="robot.py" args="joint_states:=/r1/joint_states"/>-->
+
+  <!-- Detect Markers
+  <node name="marker_detector" pkg="handover" type="detect.py"/>-->
+</launch>
