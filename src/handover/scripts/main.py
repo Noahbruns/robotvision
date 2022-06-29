@@ -20,7 +20,8 @@ import numpy as np
 # 4: rotate head
 # 1: tracking
 
-class Mode(Enum):
+# Enum of all possible State Machine States
+class States(Enum):
     Home = auto()
     Lookout = auto()
 
@@ -32,53 +33,76 @@ class Mode(Enum):
 
     Tracking = auto()
 
-def move_home(node):
-    node.move_taskspace_euler([0, 0.6, 1.2], [1.5707, 1.5707, 0])
+# State Machine class for better debugging
+class StateMachine():
+    def __init__(self):
+        self.log("StateMachine started")
+        self.state = States.Home
+        self.change = True
+
+    def setState(self, state):
+        self.state = state
+        self.change = True
+        self.log("State set to: " + str(self.state))
+    
+    def isChange(self):
+        if self.change:
+            self.change = False
+            return True
+        else:
+            return False
+
+    def getState(self):
+        return self.state
+
+    def isState(self, state):
+        return self.state == state
+
+    def log(self, text):
+        rospy.loginfo(text)
 
 def main():
-    print("Initializing ROS-node")
     rospy.init_node('handover', anonymous=True)
     target_pub = rospy.Publisher("/target", PoseStamped, queue_size=1)
     rate = rospy.Rate(1)
 
+    # Ros Communicators
     transform = tf.TransformListener()
-
     ic = ArucoDetector()
-    node = ArcMoveIt("moveit_py")
+    node = ArcMoveIt()
 
-    mode = Mode.Home
+    SM = StateMachine()
 
     while not rospy.is_shutdown():
         marker = ic.best_marker
 
         # Home Mode
-        if mode == Mode.Home:
-            move_home(node)
-            print("Arrived Home")
-            mode = Mode.Lookout
+        if SM.isState(States.Home):
+            node.move_taskspace_euler([0, 0.6, 1.2], [1.5707, 1.5707, 0])
+            SM.setState(States.Lookout)
             rospy.sleep(0.5)
             continue
 
-        if mode == Mode.Lookout:
+        if SM.isState(States.Lookout):
             if marker is None:
                 continue
 
             if marker["id"] == 0:
-                print("Found marker 0 -> Grab Object")
-                mode = Mode.Approach
+                rospy.loginfo("Found marker 0 -> Grab Object")
+                SM.setState(States.Approach)
 
             if marker["id"] == 4:
-                print("Found marker 2 -> Rotate Head")
-                mode = Mode.RotateHead
+                rospy.loginfo("Found marker 2 -> Rotate Head")
+                SM.setState(States.RotateHead)
 
             if marker["id"] == 1:
-                print("Found marker 5 -> Tracking")
-                mode = Mode.Tracking
+                rospy.loginfo("Found marker 5 -> Tracking")
+                SM.setState(States.Tracking)
 
             continue
 
-        # Home Mode
-        if marker is not None and mode == Mode.Approach:
+        # Approach Mode
+        if marker is not None and SM.isState(States.Approach):
             if marker["id"] == 0:
                 target = transform.transformPose("r1/world",
                     PoseStamped(
@@ -96,14 +120,12 @@ def main():
                 node.move_taskspace(target)
 
                 rospy.sleep(0.5)
-                mode = Mode.Closing
+                SM.setState(States.Closing)
                 continue
 
         # Home Mode
-        if marker is not None and mode == Mode.Closing:
+        if marker is not None and SM.isState(States.Closing):
             if marker["id"] == 0:
-                print("Navigation to Marker ", marker["id"])
-
                 time = transform.getLatestCommonTime("r1/camera", "r1/world")
 
                 #  add transform from cube to camera
@@ -133,32 +155,28 @@ def main():
                 node.move_taskspace_cartesian(target)
                 rospy.sleep(0.5)
 
-                mode = Mode.Done
+                SM.setState(States.Done)
                 continue
 
-        if marker is not None and mode == Mode.Done:
+        if marker is not None and SM.isState(States.Done):
             if marker["id"] == 5:
-                print("Going Home Now")
-                mode = Mode.Home
+                SM.setState(States.Home)
                 continue
 
-        if marker is not None and mode == Mode.RotateHead:
+        if marker is not None and SM.isState(States.RotateHead):
             if marker["id"] == 5:
-                print("Going Home Now")
-                mode = Mode.Home
+                SM.setState(States.Home)
                 continue
 
             joints = node.current_joints()
 
             joints[8] = (joints[8] + pi + pi / 8) % (2 * pi) - pi
-            print("Current Joint Positions: ", joints)
 
             node.move_jointspace(joints)
 
-        if marker is not None and mode == Mode.Tracking:
+        if marker is not None and SM.isState(States.Tracking):
             if marker["id"] == 5:
-                print("Going Home Now")
-                mode = Mode.Home
+                SM.setState(States.Home)
                 continue
 
         rate.sleep()

@@ -9,7 +9,7 @@
       "type": "python",
       "request": "launch",
       "program": "src/handover/scripts/main.py",
-      "args": ["joint_states:=/r1/joint_states"],
+      "args": ["joint_states:=/r1/joint_states", "image_raw:=/r1/camera/image_raw", "camera_info:=/r1/camera/camera_info"],
       "console": "integratedTerminal",
       "justMyCode": true
     },

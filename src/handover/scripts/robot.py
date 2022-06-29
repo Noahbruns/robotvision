@@ -29,7 +29,7 @@ def all_close(goal, actual, tolerance_d=0.01, tolerance_phi_rad=np.deg2rad(5)):
 
 class ArcMoveIt:
 
-    def __init__(self, name):
+    def __init__(self):
         # MoveIt commander
         moveit_commander.roscpp_initialize(sys.argv)
 

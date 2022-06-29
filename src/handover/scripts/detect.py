@@ -14,8 +14,6 @@ from reverse_projection import corner_to_area, corner_to_center, estimate_pose
 import tf
 
 real_aruco_diameter = 0.1 * 0.6
-camera_topic = "/camera/image_raw" # "/r1/camera/image_rect"
-camera_info_topic = "/r1/camera/camera_info" # "/r1/camera/camera_info"
 
 class ArucoDetector:
 
@@ -24,8 +22,8 @@ class ArucoDetector:
     self.pose_pub = rospy.Publisher("/aruco_pose", PoseArray, queue_size=1)
     self.cube_pub = rospy.Publisher("/cube_pose", PoseStamped, queue_size=1)
     self.bridge = CvBridge()
-    self.image_sub = rospy.Subscriber(camera_topic, Image, self.callback, queue_size=1)
-    self.image_camera_info_sub = rospy.Subscriber(camera_info_topic, CameraInfo, self.callback_info, queue_size=1)
+    self.image_sub = rospy.Subscriber("image_raw", Image, self.callback, queue_size=1)
+    self.image_camera_info_sub = rospy.Subscriber("camera_info", CameraInfo, self.callback_info, queue_size=1)
 
     self.markers = [None, None, None, None, None, None, None]
     self.best_marker = None
@@ -53,12 +51,13 @@ class ArucoDetector:
 
     # build map of markers
     for i in range(len(corners_list)):
-      markers[ids_list[i][0]] = {
-        "id": ids_list[i][0], 
-        "center": corner_to_center(corners_list[i]),
-        "size": corner_to_area(corners_list[i]),
-        "pose": estimate_pose_aruco(ids_list[i][0], corners_list[i][0], self.camera_info, real_aruco_diameter),
-      }
+      if ids_list[i][0] < 6:
+        markers[ids_list[i][0]] = {
+          "id": ids_list[i][0], 
+          "center": corner_to_center(corners_list[i]),
+          "size": corner_to_area(corners_list[i]),
+          "pose": estimate_pose_aruco(ids_list[i][0], corners_list[i][0], self.camera_info, real_aruco_diameter),
+        }
 
     # find best marker
     best_marker = None
