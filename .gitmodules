@@ -1,3 +1,3 @@
 [submodule "src/arc-master"]
 	path = src/arc-master
-	url = ssh://git@gitlab.tuwien.ac.at:822/e376-acin/cds/robotics/arc.git
+	url = ssh://git@gitlab.tuwien.ac.at/e376-acin/cds/robotics/arc.git
