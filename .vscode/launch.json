@@ -14,6 +14,15 @@
       "justMyCode": true
     },
     {
+      "name": "Python: Run Main Lab",
+      "type": "python",
+      "request": "launch",
+      "program": "src/handover/scripts/main_lab.py",
+      "args": ["image_raw:=/camera/color/image_raw", "camera_info:=/camera/color/camera_info"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
       "name": "Python: AcrMoveit Controller",
       "type": "python",
       "request": "launch",
