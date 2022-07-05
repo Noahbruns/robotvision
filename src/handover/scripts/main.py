@@ -13,6 +13,7 @@ from geometry_msgs.msg import Pose, PoseArray, PoseStamped, TransformStamped, Po
 from enum import Enum, auto
 from tf.transformations import quaternion_matrix, quaternion_multiply
 import numpy as np
+from StateMachine import StateMachine
 
 # Funktion:
 # 0: Greifen
@@ -32,34 +33,6 @@ class States(Enum):
     RotateHead = auto()
 
     Tracking = auto()
-
-# State Machine class for better debugging
-class StateMachine():
-    def __init__(self):
-        self.log("StateMachine started")
-        self.state = States.Home
-        self.change = True
-
-    def setState(self, state):
-        self.state = state
-        self.change = True
-        self.log("State set to: " + str(self.state))
-    
-    def isChange(self):
-        if self.change:
-            self.change = False
-            return True
-        else:
-            return False
-
-    def getState(self):
-        return self.state
-
-    def isState(self, state):
-        return self.state == state
-
-    def log(self, text):
-        rospy.loginfo(text)
 
 def main():
     rospy.init_node('handover', anonymous=True)

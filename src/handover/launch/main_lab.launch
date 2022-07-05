@@ -4,20 +4,20 @@
   <include file="$(find arc_ros)/launch/arc_ros_node.launch">
   </include>
 
-  <!-- tf between world and r1/world 
-  <node pkg="tf" type="static_transform_publisher" name="world_lock" args="0 0 0 0 0 0 world r1/world 100" />-->
-
-  <!-- Start the moveit integration node -->
-  <node pkg="arc_moveit" type="arc_moveit_controller_node.py" name="arc_moveit_controller"/>
-
-  <!-- Start the move group node -->
-  <include file="$(find arc_moveit)/launch/move_group.launch">
+  <!-- Start state machine-->
+  <include file="$(find iiwa_state_machine)/launch/iiwa_state_machine_ads.launch">
   </include>
 
-  <node name="image_proc" pkg="image_proc" type="image_proc" ns="/r1/camera" />
+  <!-- Start Camera-->
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+  </include>
+
+  <!-- tf between camera and r1/world -->
+  <node pkg="tf" type="static_transform_publisher" name="camera_tf" args="0 0.073 0.04 -1.5707 0 0 ee_link camera_link 100" />
+  <!--<node pkg="tf" type="static_transform_publisher" name="detector_tf" args="0 0 0 3.1415 0 -1.5707 /camera_color_optical_frame detector 100" />-->
+
+  <node pkg="tf" type="static_transform_publisher" name="detector_tf" args="0 0 0 3.1415 0 1.5707 /camera_color_optical_frame detector 100" />
+
   <!-- move Robot
   <node name="robot_mover" pkg="handover" type="robot.py" args="joint_states:=/r1/joint_states"/>-->
-
-  <!-- Detect Markers
-  <node name="marker_detector" pkg="handover" type="detect.py"/>-->
 </launch>
