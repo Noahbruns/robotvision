@@ -25,11 +25,11 @@ class States(Enum):
 
     Rotate = auto()
 
-speed_limit = 0.06
-speed_scale = 0.3
+speed_limit = 0.8
+speed_scale = 1
 
-rot_limit = 0.05
-rot_scale = 0.3
+rot_limit = 0.15
+rot_scale = 0.9
 
 def twist(linear, rot):
     action = Twist()
@@ -150,7 +150,7 @@ def main():
                     marker["pose"].position.z - 0.4,
                 ])
 
-                if np.sum(linear) < 0.03:
+                if np.sum(np.abs(linear)) < 0.03:
                     linear = np.zeros(3)
                     SM.setState(States.Closing)
 
@@ -178,7 +178,7 @@ def main():
                 (roll, pitch, yaw) = euler_from_orientation(pose.pose.orientation)
                 rot = np.array([roll, -pitch, -yaw])
 
-                if np.sum(linear) + np.sum(rot) < 0.03:
+                if np.sum(np.abs(linear)) < 0.02 and np.sum(np.abs(rot)) < 0.01:
                     linear = np.zeros(3)
                     rot = np.zeros(3)
                     SM.setState(States.Done)
@@ -187,6 +187,9 @@ def main():
                 rot = np.clip(rot, -rot_limit / 2, rot_limit / 2)
 
                 action = twist(linear, rot)
+
+            else:
+                rospy.loginfo("Marker lost")
 
         if marker is not None and SM.isState(States.Done):
             if marker["id"] == 5:
