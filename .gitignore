@@ -51,3 +51,5 @@ qtcreator-*
 CATKIN_IGNORE
 
 image/frames/*
+
+.DS_Store
