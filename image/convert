@@ -1,4 +1,0 @@
-cd frames
-rm frame*
-rosrun image_view extract_images image:=/detected_markers
-ffmpeg -r 8 -i frame%04d.jpg -c:v libx264 -vf fps=30 -pix_fmt yuv420p ../out.mp4
